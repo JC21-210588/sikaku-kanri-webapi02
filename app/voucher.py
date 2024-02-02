@@ -1,4 +1,6 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, HTTPException
+from sqlalchemy.orm import Session
+from db import SessionLocal, voucher
 
 app = FastAPI()
 
@@ -13,16 +15,16 @@ def get_db():
     try:
         yield db
     finally:
-        db.close():
+        db.close()
 
 @app.get("/list")
-def get_voucher_list(token:str Session = Depends(get_db)):
-    vouchers = db.query(Varchar).all()
+def get_voucher_list(token:str , db:Session = Depends(get_db)):
+    vouchers = db.query(voucher).all()
     return vouchers
 
 @app.get("/{ID}")
 def get_voucher_item(ID:str,token:str):
-    Varchar = db.query(Varchar).filter(Varchar)
+    voucher = db.query(voucher).filter(voucher)
 
     if Varchar:
         return {"voucher_id": Varchar.voucher_id,"voucher_name": Varchar.voucher_id,"voucher_date":Varchar.voucher_date}
@@ -34,8 +36,8 @@ def add_voucher_item(ID:str,NAME:str,DATE:str,token:str,db: Session = Depends(ge
     new_voucher = Varchar(voucher_id=ID, voucher_name=NAME,voucher_date=DATE)
     if new_voucher == "":
         return {"message":  "空なのでエラー"}
-else:
-    db.add(new_voucher)
-    db.commit()
-    db.refresh(new_voucher)
-	    return {"message": "voucher was added successfully", "voucher": {{"voucher_id": new_voucher.voucher_id ,"voucher_name" :new_voucher.voucher_name, "voucher_date": new_voucher.voucher_date}}}
+    else:
+        db.add(new_voucher)
+        db.commit()
+        db.refresh(new_voucher)
+        return {"message": "voucher was added successfully", "voucher": {"voucher_id": new_voucher.voucher_id ,"voucher_name" :new_voucher.voucher_name, "voucher_date": new_voucher.voucher_date}}
